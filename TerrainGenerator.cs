@@ -76,7 +76,9 @@ public class TerrainGenerator : MonoBehaviour {
         }
     }
 
-
+    /// <summary>
+    /// Generates all terrains within one frame around the player.
+    /// </summary>
     public void GenerateAllTerrains()
     {
         terrains = GameObject.FindObjectsOfType<Terrain>();
@@ -86,9 +88,9 @@ public class TerrainGenerator : MonoBehaviour {
     }
 
     /// <summary>
-    /// Places all terrains at their according positions.
+    /// Places all terrains at their according grid positions.
     /// </summary>
-    void PlaceTerrains()
+    private void PlaceTerrains()
     {
         float distance = mapSize;
 
@@ -105,7 +107,7 @@ public class TerrainGenerator : MonoBehaviour {
     }
 
     /// <summary>
-    /// Move terrains is necessary and recalculates heights. Depends on player movement.
+    /// Move terrains around player if necessary and recalculates heights. Depends on player movement.
     /// </summary>
     IEnumerator UpdateTerrainsCoroutine(bool updateAll, bool useCalculationLimitLocal)
     {
@@ -147,6 +149,7 @@ public class TerrainGenerator : MonoBehaviour {
             if (Mathf.Abs(distanceX) > highResDistance) needsLowRes = true;
             if (Mathf.Abs(distanceZ) > highResDistance) needsLowRes = true;
 
+            // Move/recalculate tile if necessary
             if (updateAll || needsMove || !(isLowRes == needsLowRes))
             {
                 int resolution = this.resolution;
@@ -192,12 +195,6 @@ public class TerrainGenerator : MonoBehaviour {
         }
 
         terrainData.size = new Vector3(mapSize, maxTerrainDepth * worldScale / worldDepthDivider, mapSize);
-
-        yield return StartCoroutine(
-            GenerateHeightsCoroutine(worldPos, resolution, terrainID, useCalculationLimitLocal, (heights) => 
-            {
-                terrainData.SetHeights(0, 0, heights);
-            }));
         
         // ugly, but needed so the "Generate terrain" button as well as adaptive calculations work
         if (useCalculationLimitLocal)
@@ -267,6 +264,7 @@ public class TerrainGenerator : MonoBehaviour {
         return height;
     }
 
+    // In/decreases calculated height values per frame, to keep above FPS limit.
     private void AdaptCalculationLimit()
     {
         float fps = (1f / Time.smoothDeltaTime);
@@ -281,6 +279,7 @@ public class TerrainGenerator : MonoBehaviour {
         }
     }
 
+    // Check if the tracked object changed.
     private bool CheckTrackingObjectChange()
     {
         if (trackingObject != lastTrackingObject)
@@ -293,8 +292,6 @@ public class TerrainGenerator : MonoBehaviour {
     }
 
 }
-
-
 
 
 [System.Serializable]
